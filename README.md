@@ -10,7 +10,7 @@ CUDA==11.3(compatiable with pytorch)
 python==1.12
 Install nessasary library referring to requirements.txt:
 
-'torch==1.12
+`torch==1.12
 
 tensorboard
 
@@ -18,7 +18,7 @@ numpy
 
 pandas
 
-scikit-learn'
+scikit-learn`
 
 `pip install -r requirements.txt`
 
@@ -38,4 +38,4 @@ The demo was trained on the provided sample file using an RTX3080 GPU, with an e
 Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
 Running instruction:
 
-'python3 GP_WAITER.py'
+`python3 GP_WAITER.py`
