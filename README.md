@@ -36,3 +36,6 @@ After Running the demo, output best model parameters, prediction accuracy and tr
 The demo was trained on the provided sample file using an RTX3080 GPU, with an estimated training time of approximately 2 minutes.
 ## Model Training-Testing
 Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
+Running instruction:
+
+'python3 GP_WAITER.py'
