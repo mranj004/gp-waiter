@@ -9,10 +9,15 @@ Ubuntu 20.04
 CUDA==11.3(compatiable with pytorch)
 python==1.12
 Install nessasary library referring to requirements.txt:
+
 'torch==1.12
+
 tensorboard
+
 numpy
+
 pandas
+
 scikit-learn'
 
 `pip install -r requirements.txt`
