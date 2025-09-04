@@ -13,7 +13,7 @@ python==1.12
 
 Install nessasary library referring to requirements.txt:
 
-'torch==1.12
+```torch==1.12
 
 tensorboard
 
@@ -21,7 +21,7 @@ numpy
 
 pandas
 
-scikit-learn'
+scikit-learn```
 
 `pip install -r requirements.txt`
 
