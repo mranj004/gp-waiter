@@ -1,0 +1,17 @@
+Metric,Count
+Number of predictions,10
+Number of true labels,10
+Metric,Shape
+ytrain shape,"torch.Size([40, 1])"
+ytest shape,"torch.Size([10, 1])"
+Predictions,True_Labels
+0.20021507,0.1722
+0.19102946,0.2209
+0.19325483,0.1885
+0.20992154,0.207
+0.22101681,0.2217
+0.20309672,0.1803
+0.19669874,0.1801
+0.2270478,0.2247
+0.21462105,0.2121
+0.22195591,0.2259
