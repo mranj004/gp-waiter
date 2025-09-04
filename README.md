@@ -21,7 +21,8 @@ numpy
 
 pandas
 
-scikit-learn```
+scikit-learn
+```
 
 `pip install -r requirements.txt`
 
