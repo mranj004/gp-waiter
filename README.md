@@ -6,11 +6,14 @@ GP-WAITER (Genome-Phenotype prediction using Weighted self-AttentIon TransformER
 GPU with 24GB cache and CPU
 ### Software
 Ubuntu 20.04
+
 CUDA==11.3(compatiable with pytorch)
+
 python==1.12
+
 Install nessasary library referring to requirements.txt:
 
-`torch==1.12
+'torch==1.12
 
 tensorboard
 
@@ -18,7 +21,7 @@ numpy
 
 pandas
 
-scikit-learn`
+scikit-learn'
 
 `pip install -r requirements.txt`
 
