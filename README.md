@@ -26,7 +26,11 @@ scikit-learn
 
 `pip install -r requirements.txt`
 
- The install time is short and you needn't wait for a long time.
+ The installation time is short and you needn't wait for a long time.
+# Datasets
+| Name    |Type     |Filename         |Line  |Row     |
+|:-----   |:----    |:--------        |:-----|:---    |
+|Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
 # Soybean Genotypic Data Preprocessing Workflow
 
 This repository contains the pipeline for processing biallelic SNP datasets as described in our study.
