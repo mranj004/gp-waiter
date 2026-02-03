@@ -11,7 +11,7 @@ CUDA==11.3(compatiable with pytorch)
 
 python==1.12
 
-Install nessasary library referring to requirements.txt:
+Install nessasary libraries referring to requirements.txt:
 
 ```torch==1.12
 
@@ -28,7 +28,7 @@ scikit-learn
 
  The installation time is short and you needn't wait for a long time.
 # Datasets
-| Name    |Type     |Filename         |Line  |Row     |
+| Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
 |:-----   |:----    |:--------        |:-----|:---    |
 |Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
 |          |Phenotype|maize244_phe.csv|244   |16       |
@@ -78,8 +78,17 @@ Running instruction:
 When using the demo script, modify the data paths as needed to ensure that the sample data is correctly loaded.
 After Running the demo, output best model parameters, prediction accuracy and training results for all epoches.
 The demo was trained on the provided sample file using an RTX3080 GPU, with an estimated training time of approximately 2 minutes.
+## Model Hyperparameters
+|Hyperparameter|Description|Default Value|
+|:-------------|:--------- |:----------|
+|num_epochs   |Number of training epochs |200 |
+|batch_size   |Batch size for training  |32 |
+|learning_rate|Learning rate for the optimizer  |0.001 |
+|optimizer    |Optimizer for improving the performance of the model |Adam  |
+|n_heads      |                        |
 ## Model Training-Testing
 Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
 Running instruction:
 
 `python3 train-test.py`
+
