@@ -32,6 +32,14 @@ scikit-learn
 |:-----   |:----    |:--------        |:-----|:---    |
 |Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
 |          |Phenotype|maize244_phe.csv|244   |16       |
+|Rice529|Genotype    |rice529_gen.csv|529 |659,573     |
+|      |Phenotype|rice529_phe.csv|529   |10      |
+|Soybean14460|Genotype    |Soybean14460_gen.csv|14460 |39,707     |
+|      |Phenotype|Soybean14460_phe.csv|14460   |11      |
+|Soybean192|Genotype    |Soybean192_gen.csv|194 |1,355,959     |
+|      |Phenotype|Soybean192_phe.csv|194   |16      |
+|Wheat406|Genotype    |Wheat406_gen.csv|406 |234,219     |
+|      |Phenotype|Wheat406_phe.csv|406   |9      |
 # Soybean Genotypic Data Preprocessing Workflow
 
 This repository contains the pipeline for processing biallelic SNP datasets as described in our study.
