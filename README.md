@@ -81,11 +81,12 @@ The demo was trained on the provided sample file using an RTX3080 GPU, with an e
 ## Model Hyperparameters
 |Hyperparameter|Description|Default Value|
 |:-------------|:--------- |:----------|
-|num_epochs   |Number of training epochs |200 |
+|num_epochs   |the number of training epochs |200 |
 |batch_size   |Batch size for training  |32 |
 |learning_rate|Learning rate for the optimizer  |0.001 |
 |optimizer    |Optimizer for improving the performance of the model |Adam  |
-|n_heads      |                        |
+|N      |the number of encoder stacks|3 |
+|num_heads   |the number of attention heads in each encoder stack|12,10,5(three encoder stacks)|
 ## Model Training-Testing
 Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
 Running instruction:
