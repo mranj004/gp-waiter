@@ -1,17 +1,13 @@
 # GP-WAITER
 GP-WAITER (Genome-Phenotype prediction using Weighted self-AttentIon TransformER) is a novel model that integrates GWAS-derived SNP weights into a hybrid CNN-Transformer architecture via an efficient tokenized embedding scheme. The model's design enables dynamic learning of trait-associated feature weights and effective modeling of long-range interactions within ultra-long genomic sequences.
-# Usage
+# Getting Started
 ## Environment
 ### Hardware
-GPU with 24GB cache and CPU
+You need GPU with at least 8GB cache and CPU.  
 ### Software
-Ubuntu 20.04
+First, please install CUDA==11.3(compatiable with pytorch) and python==1.12
 
-CUDA==11.3(compatiable with pytorch)
-
-python==1.12
-
-Install nessasary libraries referring to requirements.txt:
+Then, install nessasary libraries referring to requirements.txt:
 
 ```torch==1.12
 
@@ -23,23 +19,19 @@ pandas
 
 scikit-learn
 ```
-
+You can run the command below in the bash:
 `pip install -r requirements.txt`
 
  The installation time is short and you needn't wait for a long time.
-# Datasets
-| Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
-|:-----   |:----    |:--------        |:-----|:---    |
-|Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
-|          |Phenotype|maize244_phe.csv|244   |16       |
-|Rice529|Genotype    |rice529_gen.csv|529 |659,573     |
-|      |Phenotype|rice529_phe.csv|529   |10      |
-|Soybean14460|Genotype    |Soybean14460_gen.csv|14460 |39,707     |
-|      |Phenotype|Soybean14460_phe.csv|14460   |11      |
-|Soybean192|Genotype    |Soybean192_gen.csv|194 |1,355,959     |
-|      |Phenotype|Soybean192_phe.csv|194   |16      |
-|Wheat406|Genotype    |Wheat406_gen.csv|406 |234,219     |
-|      |Phenotype|Wheat406_phe.csv|406   |9      |
+## Setting Model Hyperparameters
+|Hyperparameter|Description|Default Value|
+|:-------------|:--------- |:----------|
+|num_epochs   |the number of training epochs |200 |
+|batch_size   |Batch size for training  |32 |
+|learning_rate|Learning rate for the optimizer  |0.001 |
+|optimizer    |Optimizer for improving the performance of the model |Adam  |
+|N      |the number of encoder stacks|3 |
+|num_heads   |the number of attention heads in each encoder stack|12,10,5(three encoder stacks)|
 # Soybean Genotypic Data Preprocessing Workflow
 
 This repository contains the pipeline for processing biallelic SNP datasets as described in our study.
@@ -67,6 +59,20 @@ bash scripts/qc_imputation.sh
 # Run LD Pruning for soybean1861
 bash scripts/ld_pruning.sh
 ```
+# Datasets
+We provide some datasets to help train and test GP-WAITER.
+| Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
+|:-----   |:----    |:--------        |:-----|:---    |
+|Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
+|          |Phenotype|maize244_phe.csv|244   |16       |
+|Rice529|Genotype    |rice529_gen.csv|529 |659,573     |
+|      |Phenotype|rice529_phe.csv|529   |10      |
+|Soybean14460|Genotype    |Soybean14460_gen.csv|14460 |39,707     |
+|      |Phenotype|Soybean14460_phe.csv|14460   |11      |
+|Soybean192|Genotype    |Soybean192_gen.csv|194 |1,355,959     |
+|      |Phenotype|Soybean192_phe.csv|194   |16      |
+|Wheat406|Genotype    |Wheat406_gen.csv|406 |234,219     |
+|      |Phenotype|Wheat406_phe.csv|406   |9      |
 # Demo
 The demo file contains only a subset of phenotypes, genotype, weighted information. Its purpose is solely to facilitate rapid testing and evaluate the usability of the model. Results obtained from this file do not reflect the model’s optimal performance and are provided for reference only.
 You can run the demo.script.py file under Demo path to help understand the training and testing process.
@@ -78,15 +84,7 @@ Running instruction:
 When using the demo script, modify the data paths as needed to ensure that the sample data is correctly loaded.
 After Running the demo, output best model parameters, prediction accuracy and training results for all epoches.
 The demo was trained on the provided sample file using an RTX3080 GPU, with an estimated training time of approximately 2 minutes.
-## Model Hyperparameters
-|Hyperparameter|Description|Default Value|
-|:-------------|:--------- |:----------|
-|num_epochs   |the number of training epochs |200 |
-|batch_size   |Batch size for training  |32 |
-|learning_rate|Learning rate for the optimizer  |0.001 |
-|optimizer    |Optimizer for improving the performance of the model |Adam  |
-|N      |the number of encoder stacks|3 |
-|num_heads   |the number of attention heads in each encoder stack|12,10,5(three encoder stacks)|
+
 ## Model Training-Testing
 Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
 Running instruction:
