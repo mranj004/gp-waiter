@@ -60,7 +60,7 @@ bash scripts/qc_imputation.sh
 bash scripts/ld_pruning.sh
 ```
 # Datasets
-We provide some datasets to help train and test GP-WAITER.
+We provide some datasets to help train and test GP-WAITER. Meanwhile, you can download the datasets below by visiting the URL() 
 | Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
 |:-----   |:----    |:--------        |:-----|:---    |
 |Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
