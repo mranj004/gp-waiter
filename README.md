@@ -9,7 +9,8 @@ First, please install CUDA==11.3(compatiable with pytorch) and python==1.12.
 
 Then, install nessasary libraries referring to requirements.txt:
 
-```torch==1.12
+```
+torch==1.12
 
 tensorboard
 
@@ -20,8 +21,9 @@ pandas
 scikit-learn
 ```
 You can run the command below in the bash:
-`pip install -r requirements.txt`
-
+```
+pip install -r requirements.txt
+```
  The installation time is short and you needn't wait for a long time.
 ## Setting Model Hyperparameters
 |Hyperparameter|Description|Default Value|
@@ -35,16 +37,17 @@ You can run the command below in the bash:
 ## Model Training-Testing
 Please modify the filepaths of gene and phenotype data in the "train-test.py" file. Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
 Running instruction:
-
-`python3 train-test.py`
+```
+python3 train-test.py
+```
 # Demo
 The demo file contains only a subset of phenotypes, genotype, weighted information. Its purpose is solely to facilitate rapid testing and evaluate the usability of the model. Results obtained from this file do not reflect the model’s optimal performance and are provided for reference only.
 You can run the demo.script.py file under Demo path to help understand the training and testing process.
 
 Running instruction:
-
-`python3 demo.script.py`
-
+```
+python3 demo.script.py
+```
 When using the demo script, modify the data paths as needed to ensure that the sample data is correctly loaded.
 After Running the demo, output best model parameters, prediction accuracy and training results for all epoches.
 The demo was trained on the provided sample file using an RTX3080 GPU, with an estimated training time of approximately 2 minutes.
@@ -76,7 +79,7 @@ bash scripts/qc_imputation.sh
 bash scripts/ld_pruning.sh
 ```
 # Datasets
-We provide some datasets to help train and test GP-WAITER. Meanwhile, you can download the datasets below by visiting [![the location]](https://doi.org/10.5281/zenodo.18476279) .
+We provide some datasets to help train and test GP-WAITER. Meanwhile, you can download the datasets below by visiting [the location](https://doi.org/10.5281/zenodo.18476279) .
 | Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
 |:-----   |:----    |:--------        |:-----|:---    |
 |Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
