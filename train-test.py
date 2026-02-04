@@ -30,8 +30,8 @@ def transform(line_gen):
 
 
 def train(phe_s,num_epochs,batch_size,lr):
-    filepath_gen = "/home/o/projects/geno-pheno-ViTransformer/data/rest/rest1/" + phe_s + "_gen.txt"
-    filepath_phe = "/home/o/projects/geno-pheno-ViTransformer/data/rest/rest1/" + phe_s + "_phe.csv"
+    filepath_gen = "/data/rest/rest1/" + phe_s + "_gen.txt"
+    filepath_phe = "/rest/rest1/" + phe_s + "_phe.csv"
    
     phe=pd.read_csv(filepath_phe)
     # phe=phe.fillna(phe.mean(axis=1))
