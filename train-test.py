@@ -84,7 +84,7 @@ def train(phe_s,num_epochs,batch_size,lr):
     model=TModel(embed_size=20,w=env_SiteScore,param=param,num_layers=3)
     # model.load_state_dict(torch.load("parameters/"+phe_s+"/"+phe_s+"_80w_8layers_64b_0.001lr/epoch_99.params"))
     if torch.cuda.is_available():
-        model.cuda()  # 注:将模型放到GPU上,因此后续传入的数据必须也在GPU上
+        model.cuda()  
 
     criterion = nn.MSELoss()
     # criterion = nn.BCELoss()
@@ -170,5 +170,5 @@ def train(phe_s,num_epochs,batch_size,lr):
 
 
 
-if __name__ == '__main__':#TIF.B17_80w_5layers_0.3d_16b_0.001lr_continue :10heads
+if __name__ == '__main__':
     train(phe_s="O.H17",num_epochs=200,batch_size=32,lr=0.001)
