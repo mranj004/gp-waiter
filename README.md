@@ -59,7 +59,7 @@ pip install -r requirements.txt
 |N      |the number of encoder stacks|3 |
 |num_heads   |the number of attention heads in each encoder stack|12,10,5(three encoder stacks)|
 ## Model Training-Testing
-Please modify the filepaths of genotype and phenotype data in the "train-test.py" file. Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
+Please modify the filepaths of genotype and phenotype data in the `train-test.py` file. Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
 Running instruction:
 ```
 python3 train-test.py
