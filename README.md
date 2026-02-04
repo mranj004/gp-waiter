@@ -105,8 +105,8 @@ We provide some datasets to help train and test GP-WAITER. Meanwhile, you can do
 |      |Phenotype|rice529_phe.csv|529   |10      |
 |Soybean14460|Genotype    |Soybean14460_gen.csv|14460 |39,707     |
 |      |Phenotype|Soybean14460_phe.csv|14460   |11      |
-|Soybean192|Genotype    |Soybean192_gen.csv|194 |1,355,959     |
-|      |Phenotype|Soybean192_phe.csv|194   |16      |
+|Soybean192|Genotype    |Soybean192_gen.csv|192 |1,355,959     |
+|      |Phenotype|Soybean192_phe.csv|192   |16      |
 |Wheat406|Genotype    |Wheat406_gen.csv|406 |234,219     |
 |      |Phenotype|Wheat406_phe.csv|406   |9      |
 
