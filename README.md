@@ -5,7 +5,7 @@ GP-WAITER (Genome-Phenotype prediction using Weighted self-AttentIon TransformER
 ### Hardware
 You need GPU with at least 8GB cache and CPU.  
 ### Software
-First, please install CUDA==11.3(compatiable with pytorch) and python==1.12
+First, please install CUDA==11.3(compatiable with pytorch) and python==1.12.
 
 Then, install nessasary libraries referring to requirements.txt:
 
@@ -33,8 +33,7 @@ You can run the command below in the bash:
 |N      |the number of encoder stacks|3 |
 |num_heads   |the number of attention heads in each encoder stack|12,10,5(three encoder stacks)|
 ## Model Training-Testing
-Please modify the gen
-Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
+Please modify the filepaths of gene and phenotype data in the "train-test.py" file. Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
 Running instruction:
 
 `python3 train-test.py`
@@ -77,7 +76,7 @@ bash scripts/qc_imputation.sh
 bash scripts/ld_pruning.sh
 ```
 # Datasets
-We provide some datasets to help train and test GP-WAITER. Meanwhile, you can download the datasets below by visiting the URL() 
+We provide some datasets to help train and test GP-WAITER. Meanwhile, you can download the datasets below by visiting [![the location]](https://doi.org/10.5281/zenodo.18476279) .
 | Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
 |:-----   |:----    |:--------        |:-----|:---    |
 |Mazie244 |Genotype |maize244_gen.csv |244   |308,136 |
