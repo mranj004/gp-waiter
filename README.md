@@ -93,7 +93,8 @@ This repository contains the pipeline for processing biallelic SNP datasets as d
 2.  **Imputation**: Missing genotypes are filled using Beagle 5.4.
 3.  **LD Pruning**: Specifically for the `soybean1861` dataset to reduce marker redundancy.
     * Parameters: `50 5 0.4` (Window: 50 SNPs, Step: 5, $r^2$ threshold: 0.4).
-
+# Calculating SNP Weights
+Use EMMAX to extract SNP weights based on GWAS p-value.
 # Datasets
 We provide some datasets to help train and test GP-WAITER. Meanwhile, you can download the datasets below by visiting [the location](https://doi.org/10.5281/zenodo.18476279) .
 | Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
