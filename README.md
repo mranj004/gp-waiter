@@ -32,6 +32,23 @@ You can run the command below in the bash:
 |optimizer    |Optimizer for improving the performance of the model |Adam  |
 |N      |the number of encoder stacks|3 |
 |num_heads   |the number of attention heads in each encoder stack|12,10,5(three encoder stacks)|
+## Model Training-Testing
+Please modify the gen
+Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
+Running instruction:
+
+`python3 train-test.py`
+# Demo
+The demo file contains only a subset of phenotypes, genotype, weighted information. Its purpose is solely to facilitate rapid testing and evaluate the usability of the model. Results obtained from this file do not reflect the model’s optimal performance and are provided for reference only.
+You can run the demo.script.py file under Demo path to help understand the training and testing process.
+
+Running instruction:
+
+`python3 demo.script.py`
+
+When using the demo script, modify the data paths as needed to ensure that the sample data is correctly loaded.
+After Running the demo, output best model parameters, prediction accuracy and training results for all epoches.
+The demo was trained on the provided sample file using an RTX3080 GPU, with an estimated training time of approximately 2 minutes.
 # Soybean Genotypic Data Preprocessing Workflow
 
 This repository contains the pipeline for processing biallelic SNP datasets as described in our study.
@@ -73,21 +90,7 @@ We provide some datasets to help train and test GP-WAITER. Meanwhile, you can do
 |      |Phenotype|Soybean192_phe.csv|194   |16      |
 |Wheat406|Genotype    |Wheat406_gen.csv|406 |234,219     |
 |      |Phenotype|Wheat406_phe.csv|406   |9      |
-# Demo
-The demo file contains only a subset of phenotypes, genotype, weighted information. Its purpose is solely to facilitate rapid testing and evaluate the usability of the model. Results obtained from this file do not reflect the model’s optimal performance and are provided for reference only.
-You can run the demo.script.py file under Demo path to help understand the training and testing process.
 
-Running instruction:
 
-`python3 demo.script.py`
 
-When using the demo script, modify the data paths as needed to ensure that the sample data is correctly loaded.
-After Running the demo, output best model parameters, prediction accuracy and training results for all epoches.
-The demo was trained on the provided sample file using an RTX3080 GPU, with an estimated training time of approximately 2 minutes.
-
-## Model Training-Testing
-Running training-testing.py file while importing GP-WAITER model from `./model/GP-WAITER.py`. Then generate trained models and test the models on a test dataset.  
-Running instruction:
-
-`python3 train-test.py`
 
