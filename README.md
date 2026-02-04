@@ -1,18 +1,19 @@
 # GP-WAITER
 GP-WAITER (Genome-Phenotype prediction using Weighted self-AttentIon TransformER) is a novel model that integrates GWAS-derived SNP weights into a hybrid CNN-Transformer architecture via an efficient tokenized embedding scheme. The model's design enables dynamic learning of trait-associated feature weights and effective modeling of long-range interactions within ultra-long genomic sequences.
 # Project Structure
-## 项目结构
-├── Demo/                # 源代码
+```
+├── Demo/               
 │   ├── Expected output/
-|       |
-│   └── 
+|       ├── parameters/
+│   ── 
 ├── .gitignore
-├── src/                # 源代码
+├── src/                
 │   ├── main.py
 │   └── utils.py
-├── data/               # 数据文件
-├── README.md              # 测试用例
+├── data/               
+├── README.md             
 └── LICENSE
+```
 
 # Getting Started
 ## Environment
@@ -84,14 +85,6 @@ This repository contains the pipeline for processing biallelic SNP datasets as d
 3.  **LD Pruning**: Specifically for the `soybean1861` dataset to reduce marker redundancy.
     * Parameters: `50 5 0.4` (Window: 50 SNPs, Step: 5, $r^2$ threshold: 0.4).
 
-## Usage
-```bash
-# Run QC and Imputation
-bash scripts/qc_imputation.sh
-
-# Run LD Pruning for soybean1861
-bash scripts/ld_pruning.sh
-```
 # Datasets
 We provide some datasets to help train and test GP-WAITER. Meanwhile, you can download the datasets below by visiting [the location](https://doi.org/10.5281/zenodo.18476279) .
 | Name    |Type     |Filename         |Line(except headers)  |Row(except index)     |
