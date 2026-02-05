@@ -65,7 +65,7 @@ Running instruction:
 python3 train-test.py
 ```
 # Demo
-The demo file contains only a subset of phenotypes, genotype, weighted information. Its purpose is solely to facilitate rapid testing and evaluate the usability of the model. Results obtained from this file do not reflect the model’s optimal performance and are provided for reference only.
+The demo file contains only a subset of phenotypes, genotype and weighted information. Its purpose is solely to facilitate rapid testing and evaluate the usability of the model. Results obtained from this file do not reflect the model’s optimal performance and are provided for reference only.
 You can run the demo.script.py file under Demo path to help understand the training and testing process.
 
 Running instruction:
