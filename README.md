@@ -15,13 +15,13 @@ GP-WAITER (Genome-Phenotype prediction using Weighted self-AttentIon TransformER
 |    |    |  ├──demo.weighted.O.csv
 |    |    |  ├──demo.genotype.O.txt
 |    |    |____demo.script.py
-|    |____Expected output
+|    |───Expected output
 |            ├──best_results_summary.json
 |            ├──parameters
 |                ├──best_O.params
 |                ├──O_training_log.json
 |                ├──best_O_predictions.csv
-|____LICENSE
+├──LICENSE
 ```
 
 # Getting Started
