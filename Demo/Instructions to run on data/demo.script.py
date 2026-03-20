@@ -124,7 +124,51 @@ def transform(line_gen):
 
     return g
 
+class EarlyStopping:
+   
+    def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt'):
+        """
+        Args:
+            patience (int): 验证损失没有提升的容忍 epoch 数，之后停止
+            verbose (bool): 若为 True，每次保存最佳模型时打印信息
+            delta (float): 最小变化，小于该值视为无提升
+            path (str): 模型保存路径
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.delta = delta
+        self.path = path
+        self.counter = 0           # 记录连续未提升的 epoch 数
+        self.best_score = None      # 最佳验证指标（如损失）
+        self.early_stop = False     # 是否触发早停
+        self.val_loss_min = np.Inf   # 当前最小验证损失
 
+    def __call__(self, val_loss, model):
+        score = -val_loss   # 损失越小越好，取负后越大表示越好
+
+        if self.best_score is None:
+            # 第一次调用，直接保存模型
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+        elif score < self.best_score + self.delta:
+            # 没有提升（score 没有大于 best_score + delta）
+            self.counter += 1
+            print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            # 有提升，更新最佳分数，重置计数器，保存模型
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+            self.counter = 0
+
+    def save_checkpoint(self, val_loss, model):
+        """保存当前最佳模型（验证损失最小）"""
+        if self.verbose:
+            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+        torch.save(model.state_dict(), self.path)
+        self.val_loss_min = val_loss
+        
 def train(phe_s,root_path, divide, num_epochs, batch_size, lr, summary_logfile):
     
     # 检查GPU是否可以使用
@@ -217,7 +261,7 @@ def train(phe_s,root_path, divide, num_epochs, batch_size, lr, summary_logfile):
     best_outputs = []  # 存储最佳模型下的所有预测值
     best_labels = []   # 存储最佳模型下的所有真实值
     
-
+    early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.pt')
     for epoch in range(num_epochs):
         model.train()
         train_labels = []         # 每个通道的真实标签
@@ -258,7 +302,7 @@ def train(phe_s,root_path, divide, num_epochs, batch_size, lr, summary_logfile):
         ##### 测试集部分
         test_outputs = []
         test_labels = []
-
+        val_loss=0
         with torch.no_grad():
             model.eval()
             for batch_index, (test_data, test_label) in enumerate(test_loader):
@@ -266,20 +310,22 @@ def train(phe_s,root_path, divide, num_epochs, batch_size, lr, summary_logfile):
                     test_data = test_data.cuda()
 
                 test_output = model(test_data)  # test_output: (batch_size, 3)
+                
+                test_loss = criterion(test_output, test_label)
+                val_loss += test_loss.item() * data.size(0)
                 test_label = test_label.squeeze()
-
                 # 累积测试数据
                 test_outputs.append(test_output.cpu().numpy())
                 test_labels.append(test_label.cpu().numpy())
-
+        
             test_outputs = np.concatenate(test_outputs, axis=0)  # 合并所有的预测值
             test_labels = np.concatenate(test_labels, axis=0)  # 合并所有的真实标签  
             print(f'the shape of test_outputs:{test_outputs.shape}')
             print(f'the shape of test_labels:{test_labels.shape}')
             corr_test = np.corrcoef(test_outputs, test_labels)[0, 1]
             print(f"Testing correlation in Epoch:{epoch} is {corr_test}")
-
-
+        
+        
         # 初始化 best_model_path 只需要做一次
         best_model_path = os.path.join(params_path, f'best_{phe_s}.params')
 
@@ -293,7 +339,7 @@ def train(phe_s,root_path, divide, num_epochs, batch_size, lr, summary_logfile):
                 os.remove(best_model_path)
 
             # 保存当前最佳模型
-            torch.save(model.state_dict(), best_model_path)
+            #torch.save(model.state_dict(), best_model_path)
 
             # 记录最佳模型下测试集所有预测值和真实值
             best_outputs = test_outputs
@@ -302,7 +348,11 @@ def train(phe_s,root_path, divide, num_epochs, batch_size, lr, summary_logfile):
 
         # 记录训练日志
         log_training_info(logfile, epoch, epoch_loss, corr_train, corr_test)
-
+        val_loss /= len(test_loader.dataset)
+        early_stopping(val_loss, model)
+        if early_stopping.early_stop:
+            print("Early stopping triggered")
+            break
     # 在汇总日志中记录最佳结果
     log_best_results(summary_logfile, phe_s,  best_epoch, best_test_corr)
     print(f"Training complete for {phe_s}. Best test correlation: {best_test_corr} at epoch {best_epoch}.")
