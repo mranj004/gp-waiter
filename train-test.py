@@ -192,6 +192,7 @@ def train(phe_s,num_epochs,batch_size,lr):
         test_prediction=[]
         test_all_labels=[]
         with torch.no_grad():
+           model.eval()
             for batch_index, (test_data, test_label) in enumerate(test_loader):
                 if torch.cuda.is_available():
                     test_data = test_data.cuda()
