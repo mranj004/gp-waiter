@@ -20,6 +20,51 @@ embed_size=90
 num_layers=2
 num_heads=10
 
+class EarlyStopping:
+   
+    def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt'):
+        """
+        Args:
+            patience (int): 验证损失没有提升的容忍 epoch 数，之后停止
+            verbose (bool): 若为 True，每次保存最佳模型时打印信息
+            delta (float): 最小变化，小于该值视为无提升
+            path (str): 模型保存路径
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.delta = delta
+        self.path = path
+        self.counter = 0           # 记录连续未提升的 epoch 数
+        self.best_score = None      # 最佳验证指标（如损失）
+        self.early_stop = False     # 是否触发早停
+        self.val_loss_min = np.Inf   # 当前最小验证损失
+
+    def __call__(self, val_loss, model):
+        score = -val_loss   # 损失越小越好，取负后越大表示越好
+
+        if self.best_score is None:
+            # 第一次调用，直接保存模型
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+        elif score < self.best_score + self.delta:
+            # 没有提升（score 没有大于 best_score + delta）
+            self.counter += 1
+            print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            # 有提升，更新最佳分数，重置计数器，保存模型
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+            self.counter = 0
+
+    def save_checkpoint(self, val_loss, model):
+        """保存当前最佳模型（验证损失最小）"""
+        if self.verbose:
+            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+        torch.save(model.state_dict(), self.path)
+        self.val_loss_min = val_loss
+
 def transform(line_gen):
     line_gen = line_gen.strip('\n')
     splited_line_gen = line_gen.split(',')
@@ -34,19 +79,16 @@ def train(phe_s,num_epochs,batch_size,lr):
     filepath_phe = "/rest/rest1/" + phe_s + "_phe.csv"
    
     phe=pd.read_csv(filepath_phe)
-    # phe=phe.fillna(phe.mean(axis=1))
-    # numerator=phe.sub(phe.min(axis=1),axis=0)
-    # denominator=
-    # phe=(phe-phe.min())/(phe.max()-phe.min())
+  
     phe=phe[phe_s]/100
-    # print("phe",np.array(phe))
+  
     g_array=[]
 
     site=pd.read_csv("data/sites_score/sitescore_"+phe_s+".csv")
     env_SiteScore=site.values#(10,826020)
   
     env_SiteScore = env_SiteScore.reshape(180, 4589)
-    #print("SiteScore.shape:",SiteScore.shape)
+ 
     with open(filepath_gen, "r") as f:
         line = f.readline()
         while line:      
@@ -82,7 +124,7 @@ def train(phe_s,num_epochs,batch_size,lr):
     param=[{"embed_size1":312,"embed_size2":260,"num_heads":12},{"embed_size1":260,"embed_size2":100,"num_heads":10},{"embed_size1":100,"embed_size2":20,"num_heads":5}]
     env_SiteScore=torch.Tensor(env_SiteScore).to(DEVICE)
     model=TModel(embed_size=20,w=env_SiteScore,param=param,num_layers=3)
-    # model.load_state_dict(torch.load("parameters/"+phe_s+"/"+phe_s+"_80w_8layers_64b_0.001lr/epoch_99.params"))
+  
     if torch.cuda.is_available():
         model.cuda()  
 
@@ -102,11 +144,12 @@ def train(phe_s,num_epochs,batch_size,lr):
     test_loader = Data.DataLoader(dataset=test_dataset, batch_size=batch_size, num_workers=1, drop_last=False,
                                    shuffle=True)
     # global_step = 0
+    early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.pt')
     for epoch in range(num_epochs):
-        testing_loss = 0.0
+        
         time_epoch_start = time.time()
         params_filename = os.path.join(params_path, 'epoch_%s.params' % epoch)
-        train_loss = 0.0
+        
 
         t_labels = []
         t_outputs = []
@@ -116,7 +159,8 @@ def train(phe_s,num_epochs,batch_size,lr):
                 train_label = train_label.squeeze().cuda()
             # input_data = train_data.view(train_data.size(0), -1)
                 output = model(train_data)
-
+                loss = criterion(output, train_label)
+                train_loss += loss.item() * data.size(0)
                 print('output:',output.shape)
                 print('train_label:',train_label.shape)
 
@@ -125,9 +169,9 @@ def train(phe_s,num_epochs,batch_size,lr):
                 b = train_label.cpu()
                 t_labels.append(b.detach().numpy())
 
-                loss = criterion(output, train_label)
+                
                 # corr=torch.corrcoef(output,train_label)
-                train_loss = train_loss + loss
+                
                 Optimizer.zero_grad()
                 loss.backward()
                 Optimizer.step()
@@ -141,7 +185,8 @@ def train(phe_s,num_epochs,batch_size,lr):
      
         m = np.corrcoef(t_outputs, t_labels)
         print("correlation coefficient of train:", m)
-        sw.add_scalar("training loss per epoch", train_loss / (batch_index + 1), epoch)
+        train_loss /= len(train_loader.dataset)
+        sw.add_scalar("training loss per epoch",  train_loss, epoch)
         sw.add_scalar("correlation coefficient of training_dataset per epoch", m[0, 1], epoch)
         torch.save(model.state_dict(), params_filename)
         test_prediction=[]
@@ -152,12 +197,16 @@ def train(phe_s,num_epochs,batch_size,lr):
                     test_data = test_data.cuda()
 
                     test_output = model(test_data)
+                    test_loss = criterion(test_output, test_label)
+                    val_loss += test_loss.item() * data.size(0)
+            
                     a = test_output.to('cpu').numpy()
                     test_prediction.append(a)
                     b = test_label.cpu().numpy()
                     test_all_labels.append(b)
                 print("batch_index=======",batch_index)
                 print("a.shape,b.shape:",a.shape,b.shape)
+            val_loss /= len(test_loader.dataset)
             test_outputs = np.concatenate(test_prediction, axis=0)
             # to_std=np.std(test_outputs)
             # print('test_prediction_outputs=======================', to_std)
@@ -167,6 +216,11 @@ def train(phe_s,num_epochs,batch_size,lr):
             m = np.corrcoef(test_outputs, test_labels)
             print("correlation coefficient of test:", m)
             sw.add_scalar("correlation coefficient of testing dataset per epoch", m[0, 1], epoch)
+
+        early_stopping(val_loss, model)
+        if early_stopping.early_stop:
+            print("Early stopping triggered")
+            break
 
 
 
