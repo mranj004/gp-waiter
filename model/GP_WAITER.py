@@ -57,7 +57,7 @@ class TModel(nn.Module):
         self.patchembed=PatchEmbedding(w)
         self.layers=nn.Sequential(*(AttentionBlock(embed_size1=param[i]["embed_size1"],embed_size2=param[i]["embed_size2"],num_heads=param[i]["num_heads"]) for i in range(num_layers)))
         self.out=nn.Sequential(nn.LayerNorm(embed_size),nn.Linear(embed_size,1),nn.GELU())
-        self.out_r=nn.Sequential(nn.Conv1d(1,1,20,2),nn.GELU(),nn.Conv1d(1,1,7,1),nn.GELU())
+        self.out_r=nn.Sequential(nn.Conv1d(1,1,20,2),nn.Tanh(),nn.Conv1d(1,1,7,1),nn.Tanh())
         self.batchnorm1d = nn.BatchNorm1d(1)
         self._initialize_weights()
 
