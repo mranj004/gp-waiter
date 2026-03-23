@@ -261,7 +261,7 @@ def train(phe_s,root_path, divide, num_epochs, batch_size, lr, summary_logfile):
     best_outputs = []  # 存储最佳模型下的所有预测值
     best_labels = []   # 存储最佳模型下的所有真实值
     
-    early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.pt')
+    early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.params')
     for epoch in range(num_epochs):
         model.train()
         train_labels = []         # 每个通道的真实标签
