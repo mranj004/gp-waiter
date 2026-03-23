@@ -144,7 +144,7 @@ def train(phe_s,num_epochs,batch_size,lr):
     test_loader = Data.DataLoader(dataset=test_dataset, batch_size=batch_size, num_workers=1, drop_last=False,
                                    shuffle=True)
     # global_step = 0
-    early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.pt')
+    early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.params')
     for epoch in range(num_epochs):
         
         time_epoch_start = time.time()
