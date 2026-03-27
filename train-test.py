@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import torch.utils.data as Data
 import time
-from model.GP_WAITER import TModel
+import GP_WAITER as gp
 import shutil
 import os
 import torch
@@ -123,7 +123,7 @@ def train(phe_s,num_epochs,batch_size,lr):
     print("CUDA:", USE_CUDA, DEVICE)
     param=[{"embed_size1":312,"embed_size2":260,"num_heads":12},{"embed_size1":260,"embed_size2":100,"num_heads":10},{"embed_size1":100,"embed_size2":20,"num_heads":5}]
     env_SiteScore=torch.Tensor(env_SiteScore).to(DEVICE)
-    model=TModel(embed_size=20,w=env_SiteScore,param=param,num_layers=3)
+    model=gp.TModel(embed_size=20,w=env_SiteScore,param=param,num_layers=3)
   
     if torch.cuda.is_available():
         model.cuda()  
@@ -143,13 +143,10 @@ def train(phe_s,num_epochs,batch_size,lr):
     test_dataset = Data.TensorDataset(xtest,ytest)
     test_loader = Data.DataLoader(dataset=test_dataset, batch_size=batch_size, num_workers=1, drop_last=False,
                                    shuffle=True)
-    # global_step = 0
     early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.params')
     for epoch in range(num_epochs):
-        
         time_epoch_start = time.time()
-        params_filename = os.path.join(params_path, 'epoch_%s.params' % epoch)
-        
+        params_filename = os.path.join(params_path, 'epoch_%s.params' % epoch) 
 
         t_labels = []
         t_outputs = []
@@ -168,9 +165,6 @@ def train(phe_s,num_epochs,batch_size,lr):
                 t_outputs.append(a.detach().numpy())
                 b = train_label.cpu()
                 t_labels.append(b.detach().numpy())
-
-                
-                # corr=torch.corrcoef(output,train_label)
                 
                 Optimizer.zero_grad()
                 loss.backward()
@@ -180,7 +174,7 @@ def train(phe_s,num_epochs,batch_size,lr):
 
 
         t_outputs = np.concatenate(t_outputs, axis=0)
-        # print('train-prediction-outputs=======================', np.std(t_outputs))
+   
         t_labels = np.concatenate(t_labels, axis=0)
      
         m = np.corrcoef(t_outputs, t_labels)
