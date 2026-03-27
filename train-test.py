@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import torch.utils.data as Data
 import time
-import GP_WAITER as gp
+from model import GP_WAITER as gp
 import shutil
 import os
 import torch
