@@ -12,10 +12,6 @@ import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
 
 
-num_epochs = 200
-batch_size = 16
-lr = 0.001
-
 class EarlyStopping:
    
     def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt'):
