@@ -11,14 +11,10 @@ import torch.optim as optim
 import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
 
-phenotype='O.H17'
+
 num_epochs = 200
 batch_size = 16
 lr = 0.001
-num_samples=1257
-embed_size=90
-num_layers=2
-num_heads=10
 
 class EarlyStopping:
    
