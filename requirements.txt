@@ -1,4 +1,5 @@
-torch==1.12
+torch>=2.0
 tensorboard
-numpy
+numpy<2
 pandas
+scikit-learn

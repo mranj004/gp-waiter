@@ -1,215 +1,142 @@
-import numpy as np
-from sklearn.model_selection import train_test_split
-import torch.utils.data as Data
-import time
-from model import GP_WAITER as gp
-import shutil
+import argparse
 import os
-import torch
-from torch import nn
-import torch.optim as optim
+from pathlib import Path
+
+import numpy as np
 import pandas as pd
-from torch.utils.tensorboard import SummaryWriter
+import torch
+import torch.optim as optim
+import torch.utils.data as Data
+from sklearn.model_selection import train_test_split
+from torch import nn
+
+from model import TModel
 
 
-class EarlyStopping:
-   
-    def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt'):
-        """
-        Args:
-            patience (int): 验证损失没有提升的容忍 epoch 数，之后停止
-            verbose (bool): 若为 True，每次保存最佳模型时打印信息
-            delta (float): 最小变化，小于该值视为无提升
-            path (str): 模型保存路径
-        """
-        self.patience = patience
-        self.verbose = verbose
-        self.delta = delta
-        self.path = path
-        self.counter = 0           # 记录连续未提升的 epoch 数
-        self.best_score = None      # 最佳验证指标（如损失）
-        self.early_stop = False     # 是否触发早停
-        self.val_loss_min = np.Inf   # 当前最小验证损失
-
-    def __call__(self, val_loss, model):
-        score = -val_loss   # 损失越小越好，取负后越大表示越好
-
-        if self.best_score is None:
-            # 第一次调用，直接保存模型
-            self.best_score = score
-            self.save_checkpoint(val_loss, model)
-        elif score < self.best_score + self.delta:
-            # 没有提升（score 没有大于 best_score + delta）
-            self.counter += 1
-            print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
-            if self.counter >= self.patience:
-                self.early_stop = True
-        else:
-            # 有提升，更新最佳分数，重置计数器，保存模型
-            self.best_score = score
-            self.save_checkpoint(val_loss, model)
-            self.counter = 0
-
-    def save_checkpoint(self, val_loss, model):
-        """保存当前最佳模型（验证损失最小）"""
-        if self.verbose:
-            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-        torch.save(model.state_dict(), self.path)
-        self.val_loss_min = val_loss
-
-def transform(line_gen):
-    line_gen = line_gen.strip('\n')
-    splited_line_gen = line_gen.split(',')
-    g = list(map(lambda x: float(x), splited_line_gen[1:]))
-    g = np.array(g).reshape(180, 4589)
-    g = g.astype(np.float32)
+def transform(line_gen: str, rows: int, cols: int) -> np.ndarray:
+    values = line_gen.strip("\n").split(",")[1:]
+    g = np.array([float(v) for v in values], dtype=np.float32).reshape(rows, cols)
     return g
 
 
-def train(phe_s,num_epochs,batch_size,lr):
-    filepath_gen = "/data/rest/rest1/" + phe_s + "_gen.txt"
-    filepath_phe = "/rest/rest1/" + phe_s + "_phe.csv"
-   
-    phe=pd.read_csv(filepath_phe)
-  
-    phe=phe[phe_s]/100
-  
-    g_array=[]
+class EarlyStopping:
+    def __init__(self, patience: int = 5, delta: float = 0.0, path: str = "best_model.params"):
+        self.patience = patience
+        self.delta = delta
+        self.path = path
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
 
-    site=pd.read_csv("data/sites_score/sitescore_"+phe_s+".csv")
-    env_SiteScore=site.values#(10,826020)
-  
-    env_SiteScore = env_SiteScore.reshape(180, 4589)
- 
-    with open(filepath_gen, "r") as f:
-        line = f.readline()
-        while line:      
-            gen=transform(line)
-            g_array.append(gen)
-            line = f.readline()
-        
-    print(len(g_array))
-    print(np.array(g_array).shape)
+    def __call__(self, val_loss: float, model: nn.Module) -> None:
+        score = -val_loss
+        if self.best_score is None or score > self.best_score + self.delta:
+            self.best_score = score
+            self.counter = 0
+            torch.save(model.state_dict(), self.path)
+            return
+        self.counter += 1
+        if self.counter >= self.patience:
+            self.early_stop = True
 
 
-    xtrain, xtest, ytrain, ytest = train_test_split(g_array, phe, test_size=0.2, random_state=100)
-    xtrain=np.array(xtrain)
-    ytrain=np.array(ytrain)
-    xtest=np.array(xtest)
-    ytest=np.array(ytest)
-    print(xtrain.shape,ytrain.shape,xtest.shape,ytest.shape)
+def train(args: argparse.Namespace) -> None:
+    device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
 
-    params_path = os.path.join('parameters', "T_CNN_SiteScore", phe_s+'_80w_8layers_'+str(batch_size)+'b_0.001lr')
-    print('params_path:', params_path)
-    if (not os.path.exists(params_path)):
-        os.makedirs(params_path)
-        print('create params directory %s' % (params_path))
-    else:
-        shutil.rmtree(params_path)
-        os.makedirs(params_path)
-        print('delete the old one and create params directory %s' % (params_path))
+    phe = pd.read_csv(args.phenotype_csv)
+    y = phe[args.phenotype_column].to_numpy(dtype=np.float32) / args.phenotype_divisor
 
-    USE_CUDA = torch.cuda.is_available()
-    DEVICE = torch.device('cuda:0')
-    # DEVICE = torch.device('cpu')
-    print("CUDA:", USE_CUDA, DEVICE)
-    param=[{"embed_size1":312,"embed_size2":260,"num_heads":12},{"embed_size1":260,"embed_size2":100,"num_heads":10},{"embed_size1":100,"embed_size2":20,"num_heads":5}]
-    env_SiteScore=torch.Tensor(env_SiteScore).to(DEVICE)
-    model=gp.TModel(embed_size=20,w=env_SiteScore,param=param,num_layers=3)
-  
-    if torch.cuda.is_available():
-        model.cuda()  
+    site = pd.read_csv(args.weight_csv)
+    weights = site[args.weight_column].to_numpy(dtype=np.float32).reshape(args.rows, args.cols)
 
+    g_array = []
+    with open(args.genotype_txt, "r", encoding="utf-8") as f:
+        for line in f:
+            g_array.append(transform(line, args.rows, args.cols))
+    X = np.array(g_array, dtype=np.float32)
+
+    xtrain, xtest, ytrain, ytest = train_test_split(X, y, test_size=args.test_size, random_state=args.seed)
+
+    params_path = Path(args.output_dir)
+    params_path.mkdir(parents=True, exist_ok=True)
+
+    param = [
+        {"embed_size1": 198, "embed_size2": 150, "num_heads": 9},
+        {"embed_size1": 150, "embed_size2": 100, "num_heads": 10},
+        {"embed_size1": 100, "embed_size2": 20, "num_heads": 5},
+    ]
+    model = TModel(embed_size=20, w=torch.tensor(weights, dtype=torch.float32, device=device), param=param, num_layers=3).to(device)
     criterion = nn.MSELoss()
-    # criterion = nn.BCELoss()
-    Optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 
-    sw = SummaryWriter(log_dir=params_path, flush_secs=5)
-    xtrain=torch.Tensor(xtrain)
-    ytrain = torch.Tensor(ytrain)
-    xtest = torch.Tensor(xtest)
-    ytest = torch.Tensor(ytest)
-    train_dataset=Data.TensorDataset(xtrain,ytrain)
-    train_loader = Data.DataLoader(dataset=train_dataset, batch_size=batch_size, num_workers=1, drop_last=True,
-                                   shuffle=True)
-    test_dataset = Data.TensorDataset(xtest,ytest)
-    test_loader = Data.DataLoader(dataset=test_dataset, batch_size=batch_size, num_workers=1, drop_last=False,
-                                   shuffle=True)
-    early_stopping = EarlyStopping(patience=5, verbose=True, path=params_path+'/best_model.params')
-    for epoch in range(num_epochs):
-        time_epoch_start = time.time()
-        params_filename = os.path.join(params_path, 'epoch_%s.params' % epoch) 
+    train_loader = Data.DataLoader(
+        Data.TensorDataset(torch.tensor(xtrain), torch.tensor(ytrain)),
+        batch_size=args.batch_size,
+        shuffle=True,
+        drop_last=False,
+    )
+    test_loader = Data.DataLoader(
+        Data.TensorDataset(torch.tensor(xtest), torch.tensor(ytest)),
+        batch_size=args.batch_size,
+        shuffle=False,
+        drop_last=False,
+    )
 
-        t_labels = []
-        t_outputs = []
-        for batch_index, (train_data, train_label) in enumerate(train_loader):
-            if torch.cuda.is_available():
-                train_data = train_data.cuda()
-                train_label = train_label.squeeze().cuda()
-            # input_data = train_data.view(train_data.size(0), -1)
-                output = model(train_data)
-                loss = criterion(output, train_label)
-                train_loss += loss.item() * data.size(0)
-                print('output:',output.shape)
-                print('train_label:',train_label.shape)
+    early_stopping = EarlyStopping(patience=args.patience, path=str(params_path / "best_model.params"))
 
-                a = output.to('cpu')
-                t_outputs.append(a.detach().numpy())
-                b = train_label.cpu()
-                t_labels.append(b.detach().numpy())
-                
-                Optimizer.zero_grad()
-                loss.backward()
-                Optimizer.step()
+    for epoch in range(args.epochs):
+        model.train()
+        train_loss = 0.0
+        for train_data, train_label in train_loader:
+            train_data = train_data.to(device)
+            train_label = train_label.to(device)
+            pred = model(train_data)
+            loss = criterion(pred, train_label)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item() * train_data.size(0)
 
-                print('Epoch: {}, batch_index:{},Loss: {:.5f}'.format(epoch, batch_index, loss))
-
-
-        t_outputs = np.concatenate(t_outputs, axis=0)
-   
-        t_labels = np.concatenate(t_labels, axis=0)
-     
-        m = np.corrcoef(t_outputs, t_labels)
-        print("correlation coefficient of train:", m)
         train_loss /= len(train_loader.dataset)
-        sw.add_scalar("training loss per epoch",  train_loss, epoch)
-        sw.add_scalar("correlation coefficient of training_dataset per epoch", m[0, 1], epoch)
-        torch.save(model.state_dict(), params_filename)
-        test_prediction=[]
-        test_all_labels=[]
+
+        model.eval()
+        val_loss = 0.0
         with torch.no_grad():
-           model.eval()
-            for batch_index, (test_data, test_label) in enumerate(test_loader):
-                if torch.cuda.is_available():
-                    test_data = test_data.cuda()
+            for test_data, test_label in test_loader:
+                test_data = test_data.to(device)
+                test_label = test_label.to(device)
+                pred = model(test_data)
+                loss = criterion(pred, test_label)
+                val_loss += loss.item() * test_data.size(0)
+        val_loss /= len(test_loader.dataset)
 
-                    test_output = model(test_data)
-                    test_loss = criterion(test_output, test_label)
-                    val_loss += test_loss.item() * data.size(0)
-            
-                    a = test_output.to('cpu').numpy()
-                    test_prediction.append(a)
-                    b = test_label.cpu().numpy()
-                    test_all_labels.append(b)
-                print("batch_index=======",batch_index)
-                print("a.shape,b.shape:",a.shape,b.shape)
-            val_loss /= len(test_loader.dataset)
-            test_outputs = np.concatenate(test_prediction, axis=0)
-            # to_std=np.std(test_outputs)
-            # print('test_prediction_outputs=======================', to_std)
-            test_labels = np.concatenate(test_all_labels, axis=0)
-
-            print("test_outputs.shape,test_labels.shape:",test_outputs.shape,test_labels.shape)
-            m = np.corrcoef(test_outputs, test_labels)
-            print("correlation coefficient of test:", m)
-            sw.add_scalar("correlation coefficient of testing dataset per epoch", m[0, 1], epoch)
-
+        print(f"Epoch {epoch + 1}/{args.epochs} - train_loss={train_loss:.6f} val_loss={val_loss:.6f}")
         early_stopping(val_loss, model)
         if early_stopping.early_stop:
             print("Early stopping triggered")
             break
 
 
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Train/test GP-WAITER.")
+    p.add_argument("--genotype-txt", required=True)
+    p.add_argument("--phenotype-csv", required=True)
+    p.add_argument("--weight-csv", required=True)
+    p.add_argument("--phenotype-column", required=True)
+    p.add_argument("--weight-column", default="c2")
+    p.add_argument("--rows", type=int, required=True)
+    p.add_argument("--cols", type=int, required=True)
+    p.add_argument("--output-dir", default="parameters/run")
+    p.add_argument("--epochs", type=int, default=20)
+    p.add_argument("--batch-size", type=int, default=32)
+    p.add_argument("--learning-rate", type=float, default=1e-3)
+    p.add_argument("--patience", type=int, default=5)
+    p.add_argument("--test-size", type=float, default=0.2)
+    p.add_argument("--seed", type=int, default=100)
+    p.add_argument("--phenotype-divisor", type=float, default=100.0)
+    p.add_argument("--cpu", action="store_true")
+    return p.parse_args()
 
-if __name__ == '__main__':
-    train(phe_s="O.H17",num_epochs=200,batch_size=32,lr=0.001)
+
+if __name__ == "__main__":
+    train(parse_args())
